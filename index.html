@@ -17,10 +17,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+    <!-- Tambahkan ini untuk menerjemahkan JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
   <body class="bg-gray-50">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <!-- Ubah tipe skrip ini agar Babel bisa memprosesnya -->
+    <script type="text/babel" data-type="module" src="/index.tsx"></script>
   </body>
 </html>
