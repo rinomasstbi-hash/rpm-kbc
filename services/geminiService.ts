@@ -17,6 +17,16 @@ function createPrompt(data: RPMInput): string {
     graduateDimensions
   } = data;
 
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const currentMonth = today.getMonth(); // 0-11 (Jan-Dec)
+  const semester = (currentMonth >= 6 && currentMonth <= 11) ? 'Ganjil' : 'Genap';
+
   const practicesText = pedagogicalPractices
     .map((practice, index) => `Pertemuan ${index + 1}: ${practice}`)
     .join(', ');
@@ -55,7 +65,7 @@ function createPrompt(data: RPMInput): string {
     a. **IDENTITAS**
        - Nama Madrasah: MTsN 4 Jombang
        - Mata Pelajaran: ${subject}
-       - Kelas/Semester: ${className} / [Generate semester ganjil/genap secara logis]
+       - Kelas/Semester: ${className} / ${semester}
        - Durasi Pertemuan: ${meetings} x (2 x 40 menit)
 
     b. **IDENTIFIKASI**
@@ -86,7 +96,7 @@ function createPrompt(data: RPMInput): string {
 
     2.  **Tanda Tangan:** Setelah tabel utama, buatlah sebuah tabel baru untuk bagian tanda tangan dengan gaya \`<table style="width: 100%; margin-top: 40px; border: none;">\`. Tabel ini harus memiliki satu baris (\`<tr>\`) dan dua kolom (\`<td>\`).
         - Kolom kiri: \`<td style="width: 50%; vertical-align: top; border: none;">Mengetahui,<br/>Kepala MTsN 4 Jombang<br/><br/><br/><br/><b>Sulthon Sulaiman, M.Pd.I.</b><br/>NIP. 19810616 2005011003</td>\`
-        - Kolom kanan: \`<td style="width: 50%; vertical-align: top; border: none;">Jombang, [Generate tanggal hari ini format DD MMMM YYYY]<br/>Guru Mata Pelajaran<br/><br/><br/><br/><b>${teacherName}</b><br/>NIP. ${teacherNip}</td>\`
+        - Kolom kanan: \`<td style="width: 50%; vertical-align: top; border: none;">Jombang, ${formattedDate}<br/>Guru Mata Pelajaran<br/><br/><br/><br/><b>${teacherName}</b><br/>NIP. ${teacherNip}</td>\`
 
     3.  **LAMPIRAN:** Gunakan \`<div style="page-break-before: always;">\` untuk memulai di halaman baru.
         - \`<h2>Lampiran</h2>\`
