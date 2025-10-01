@@ -7,7 +7,7 @@ interface RPMFormProps {
   isLoading: boolean;
 }
 
-const InputField: React.FC<{ id: string, label: string, type?: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, required?: boolean }> = ({ id, label, type = "text", value, onChange, required = true }) => (
+const InputField: React.FC<{ id: string, label: string, type?: string, value: string | number, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, required?: boolean, error?: string }> = ({ id, label, type = "text", value, onChange, required = true, error }) => (
   <div>
     <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
     <input
@@ -17,12 +17,15 @@ const InputField: React.FC<{ id: string, label: string, type?: string, value: st
       value={value}
       onChange={onChange}
       required={required}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900"
+      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 ${error ? 'border-red-500' : 'border-gray-300'}`}
+      aria-invalid={!!error}
+      aria-describedby={error ? `${id}-error` : undefined}
     />
+    {error && <p id={`${id}-error`} className="text-red-500 text-sm mt-1">{error}</p>}
   </div>
 );
 
-const TextareaField: React.FC<{ id: string, label: string, value: string, onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void, rows?: number }> = ({ id, label, value, onChange, rows = 3 }) => (
+const TextareaField: React.FC<{ id: string, label: string, value: string, onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void, rows?: number, error?: string }> = ({ id, label, value, onChange, rows = 3, error }) => (
   <div>
     <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
     <textarea
@@ -32,8 +35,11 @@ const TextareaField: React.FC<{ id: string, label: string, value: string, onChan
       onChange={onChange}
       required
       rows={rows}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900"
+      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 bg-white text-gray-900 ${error ? 'border-red-500' : 'border-gray-300'}`}
+      aria-invalid={!!error}
+      aria-describedby={error ? `${id}-error` : undefined}
     />
+    {error && <p id={`${id}-error`} className="text-red-500 text-sm mt-1">{error}</p>}
   </div>
 );
 
@@ -64,7 +70,7 @@ export const RPMForm: React.FC<RPMFormProps> = ({ onSubmit, isLoading }) => {
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: name === 'meetings' ? parseInt(value, 10) : value }));
+    setFormData(prev => ({ ...prev, [name]: name === 'meetings' ? (parseInt(value, 10) || 0) : value }));
   }, []);
 
   const handlePracticeChange = useCallback((index: number, value: PedagogicalPractice) => {
@@ -107,8 +113,8 @@ export const RPMForm: React.FC<RPMFormProps> = ({ onSubmit, isLoading }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <InputField id="teacherName" label="Nama Guru" value={formData.teacherName} onChange={handleChange} />
-      <InputField id="teacherNip" label="NIP Guru" type="text" value={formData.teacherNip} onChange={handleChange} />
+      <InputField id="teacherName" label="Nama Guru" value={formData.teacherName} onChange={handleChange} error={errors.teacherName} />
+      <InputField id="teacherNip" label="NIP Guru" type="text" value={formData.teacherNip} onChange={handleChange} error={errors.teacherNip} />
       
       <div>
         <label htmlFor="className" className="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
@@ -119,9 +125,9 @@ export const RPMForm: React.FC<RPMFormProps> = ({ onSubmit, isLoading }) => {
         </select>
       </div>
 
-      <InputField id="subject" label="Mata Pelajaran" value={formData.subject} onChange={handleChange} />
-      <TextareaField id="learningObjectives" label="Tujuan Pembelajaran" value={formData.learningObjectives} onChange={handleChange} />
-      <TextareaField id="subjectMatter" label="Materi Pelajaran" value={formData.subjectMatter} onChange={handleChange} />
+      <InputField id="subject" label="Mata Pelajaran" value={formData.subject} onChange={handleChange} error={errors.subject}/>
+      <TextareaField id="learningObjectives" label="Tujuan Pembelajaran" value={formData.learningObjectives} onChange={handleChange} error={errors.learningObjectives}/>
+      <TextareaField id="subjectMatter" label="Materi Pelajaran" value={formData.subjectMatter} onChange={handleChange} error={errors.subjectMatter}/>
 
       <div>
         <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">Bahasa Pembuka/Penutup</label>
@@ -131,8 +137,7 @@ export const RPMForm: React.FC<RPMFormProps> = ({ onSubmit, isLoading }) => {
         </select>
       </div>
       
-      <InputField id="meetings" label="Jumlah Pertemuan" type="number" value={formData.meetings.toString()} onChange={handleChange} />
-       {errors.meetings && <p className="text-red-500 text-sm">{errors.meetings}</p>}
+      <InputField id="meetings" label="Jumlah Pertemuan" type="number" value={formData.meetings} onChange={handleChange} error={errors.meetings} />
       
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Praktik Pedagogis per Pertemuan</label>
@@ -152,8 +157,8 @@ export const RPMForm: React.FC<RPMFormProps> = ({ onSubmit, isLoading }) => {
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Dimensi Lulusan (Pilih beberapa)</label>
+      <fieldset>
+        <legend className="block text-sm font-medium text-gray-700 mb-1">Dimensi Lulusan (Pilih beberapa)</legend>
         <div className="grid grid-cols-2 gap-2 mt-2">
           {GRADUATE_DIMENSIONS.map(dim => (
             <label key={dim} className="flex items-center space-x-2">
@@ -168,7 +173,7 @@ export const RPMForm: React.FC<RPMFormProps> = ({ onSubmit, isLoading }) => {
           ))}
         </div>
          {errors.graduateDimensions && <p className="text-red-500 text-sm mt-2">{errors.graduateDimensions}</p>}
-      </div>
+      </fieldset>
 
       <button
         type="submit"
